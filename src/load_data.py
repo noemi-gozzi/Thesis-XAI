@@ -55,17 +55,17 @@ def load_dataset():
     # loading sepearte databases for each round and subject
     for i in range(0, N_Subj):
         df_r1[i] = pd.read_csv(
-            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\CODE\\resources\\data_features\\database_v2_sbj{}_s1_WL512_S128_r1.csv".format(
+            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\database_v2_sbj{}_s1_WL512_S128_r1.csv".format(
                 i + 1))
         df_r1[i].columns = cl_names
 
         df_r2[i] = pd.read_csv(
-            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\CODE\\resources\\data_features\\database_v2_sbj{}_s1_WL512_S128_r2.csv".format(
+            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\database_v2_sbj{}_s1_WL512_S128_r2.csv".format(
                 i + 1))
         df_r2[i].columns = cl_names
 
         df_r3[i] = pd.read_csv(
-            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\CODE\\resources\\data_features\\database_v2_sbj{}_s1_WL512_S128_r3.csv".format(
+            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\database_v2_sbj{}_s1_WL512_S128_r3.csv".format(
                 i + 1))
         df_r3[i].columns = cl_names
 
