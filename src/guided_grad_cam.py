@@ -6,7 +6,10 @@ from matplotlib import pyplot as plt
 from keras import backend as K
 from keras.preprocessing import image
 #from keras.applications.vgg16 import VGG16, preprocess_input, decode_predictions
-from keras.applications.inception_v3 import InceptionV3, preprocess_input, decode_predictions
+# from keras.applications.inception_v3 import InceptionV3, preprocess_input, decode_predictions
+from keras.applications import resnet50
+from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
+#model=ResNet50((weights='imagenet'))
 import tensorflow as tf
 from tensorflow.python.framework import ops
 from tensorflow.python.framework import ops
@@ -23,11 +26,11 @@ def build_model():
      - Loaded with load_model
      - Loaded from keras.applications
     """
-    return InceptionV3(include_top=True, weights='imagenet')
+    return ResNet50(include_top=True, weights='imagenet')
 
 
-H, W = 299, 299 # Input shape, defined by the model (model.input_shape)
-
+#H, W = 299, 299 # Input shape, defined by the model (model.input_shape)
+H, W = 224, 224
 
 # ---------------------------------------------------------------------
 
@@ -81,7 +84,8 @@ def build_guided_model():
             return grad * tf.cast(grad > 0., dtype) * \
                    tf.cast(op.inputs[0] > 0., dtype)
     # tf.compat.v1.get_default_graph()
-    g = tf.compat.v1.get_default_graph()
+    #g = tf.compat.v1.get_default_graph()
+    g=tf.get_default_graph()
     with g.gradient_override_map({'Relu': 'GuidedBackProp'}):
         new_model = build_model()
     return new_model
@@ -201,8 +205,8 @@ if __name__ == '__main__':
     model = build_model()
     guided_model = build_guided_model()
     plt.imshow(load_image(image_path, H, W)[0])
-    pre_processed_input = load_image(image_path, H=299, W=299)
-    gradcam, gb, guided_gradcam = compute_saliency(model, guided_model, image_path, pre_processed_input, layer_name='mixed10',
+    pre_processed_input = load_image(image_path, H=224, W=224)
+    gradcam, gb, guided_gradcam = compute_saliency(model, guided_model, image_path, pre_processed_input, layer_name='activation_49',
                                                     cls=-1, visualize=True, save=True)
 # # img_path=sys.argv[1]
     print(gradcam.shape)
