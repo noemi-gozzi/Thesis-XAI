@@ -6,9 +6,9 @@ from matplotlib import pyplot as plt
 from keras import backend as K
 from keras.preprocessing import image
 #from keras.applications.vgg16 import VGG16, preprocess_input, decode_predictions
-# from keras.applications.inception_v3 import InceptionV3, preprocess_input, decode_predictions
+from keras.applications.inception_v3 import InceptionV3, preprocess_input, decode_predictions
 from keras.applications import resnet50
-from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
+#from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
 #model=ResNet50((weights='imagenet'))
 import tensorflow as tf
 from tensorflow.python.framework import ops
@@ -26,11 +26,11 @@ def build_model():
      - Loaded with load_model
      - Loaded from keras.applications
     """
-    return ResNet50(include_top=True, weights='imagenet')
+    return InceptionV3(include_top=True, weights='imagenet')
 
 
-#H, W = 299, 299 # Input shape, defined by the model (model.input_shape)
-H, W = 224, 224
+H, W = 299, 299 # Input shape, defined by the model (model.input_shape)
+#H, W = 224, 224
 
 # ---------------------------------------------------------------------
 

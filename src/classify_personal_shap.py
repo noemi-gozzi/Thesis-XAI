@@ -96,23 +96,26 @@ def shap_values (path_shap):
     random_seed = 0;
     n_estimators = 100;
     model=ExtraTreesClassifier(n_estimators=n_estimators, random_state=random_seed)
-    for patient in range(10,num_patient):
+    for patient in range(6,num_patient):
         model.fit(X_train[patient], y_train[patient])
         shap_explainer = shap.TreeExplainer(model)
         shap_values = shap_explainer.shap_values(X_test[patient])
+        path_img_bar = path_shap + "patient{}_allclasses.png".format(patient)
+        plt.figure()
+        shap.summary_plot(shap_values, X_test[patient], plot_type="bar", show=False)
+        plt.savefig(path_img_bar)
 
-
-        for value in range(len(shap_values)):
-            path_img_dot = path_shap + "dot_patient{}_class{}.png".format(patient, value)
-            plt.figure()
-            shap.summary_plot(shap_values[value], X_test[patient], plot_type="dot", show=False)
-            plt.savefig(path_img_dot)
-            plt.close()
-            plt.figure()
-            path_img_bar = path_shap + "bar_patient{}_class{}.png".format(patient, value)
-            shap.summary_plot(shap_values[value], X_test[patient], plot_type="bar", show=False)
-            plt.savefig(path_img_bar)
-            plt.close()
+        # for value in range(len(shap_values)):
+        #     path_img_dot = path_shap + "dot_patient{}_class{}.png".format(patient, value)
+        #     plt.figure()
+        #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="dot", show=False)
+        #     plt.savefig(path_img_dot)
+        #     plt.close()
+        #     plt.figure()
+        #     path_img_bar = path_shap + "bar_patient{}_class{}.png".format(patient, value)
+        #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="bar", show=False)
+        #     plt.savefig(path_img_bar)
+        #     plt.close()
     return
 
 def grid_search_algorithm(classifier, parameters, X_train, y_train, X_test, y_test):
@@ -145,21 +148,21 @@ if __name__ == "__main__":
 
     #####calculate shap values for each patient for some type of trees.
 
-    # path_shap = "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\images\\result_shap\\"
-    # shap_values(path_shap)
+    path_shap = "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\images\\result_shap\\"
+    shap_values(path_shap)
 
-    X_train, y_train, X_test, y_test = load_dataset()
-    num_patient = len(X_train)
-    random_seed = 0;
-    n_estimators = 100;
-    model = ExtraTreesClassifier()
-    parameters = {'criterion': [ 'gini'],
-                  'n_estimators':[100],
-                  #'max_depth': [15, 30, 50, 100],
-                  #'min_samples_split': [0.003, 0.004, 0.005, 0.007],
-                  #'min_samples_leaf': [0.001, 0.002],
-                  'random_state': [0]}
-    scores={}
-    for patient in range(10,num_patient):
-        scores[patient]=grid_search_algorithm(model, parameters, X_train[patient], y_train[patient], X_test[patient], y_test[patient])
-        print(scores)
+    # X_train, y_train, X_test, y_test = load_dataset()
+    # num_patient = len(X_train)
+    # random_seed = 0;
+    # n_estimators = 100;
+    # model = ExtraTreesClassifier()
+    # parameters = {'criterion': [ 'gini'],
+    #               'n_estimators':[100],
+    #               #'max_depth': [15, 30, 50, 100],
+    #               #'min_samples_split': [0.003, 0.004, 0.005, 0.007],
+    #               #'min_samples_leaf': [0.001, 0.002],
+    #               'random_state': [0]}
+    # scores={}
+    # for patient in range(10,num_patient):
+    #     scores[patient]=grid_search_algorithm(model, parameters, X_train[patient], y_train[patient], X_test[patient], y_test[patient])
+    #     print(scores)
