@@ -10,3 +10,4 @@ for patient in scores:
         print ("model: ", model)
         print("\t\t\t\t accuracy: ", scores[patient][model]['acc'])
         print("\t\t\t\t f1: ", scores[patient][model]['f1'])
+

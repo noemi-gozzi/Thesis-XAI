@@ -1,15 +1,8 @@
-import sys
-import os
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
 from keras import backend as K
 from keras.preprocessing import image
-#from keras.applications.vgg16 import VGG16, preprocess_input, decode_predictions
-#from keras.applications.inception_v3 import InceptionV3, preprocess_input, decode_predictions
-#from keras.applications import resnet50
-#from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
-#model=ResNet50((weights='imagenet'))
 import tensorflow as tf
 from tensorflow.python.framework import ops
 from tensorflow.python.framework import ops
@@ -17,68 +10,18 @@ from keras.layers import Layer
 #import kapre
 import keras
 import keras.utils as ku
-
 from keras.layers import Conv2D, LocallyConnected2D, Conv2DTranspose, Flatten, Dense, LeakyReLU, PReLU, Input, add, Layer
-from keras.layers import BatchNormalization, UpSampling2D, Activation, Dropout, MaxPooling2D, AveragePooling2D
-from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateScheduler, ReduceLROnPlateau, TensorBoard
 from keras.models import Sequential, load_model, Model
+from utils.utils_classes import RReLU
 
 
-
-
-class RReLU(Layer):
-    '''Randomized Leaky Rectified Linear Unit
-    that uses a random alpha in training while using the average of alphas
-    in testing phase:
-    During training
-    `f(x) = alpha * x for x < 0, where alpha ~ U(l, u), l < u`,
-    `f(x) = x for x >= 0`.
-    During testing:
-    `f(x) = (l + u) / 2 * x for x < 0`,
-    `f(x) = x for x >= 0`.
-    # Input shape
-        Arbitrary. Use the keyword argument `input_shape`
-        (tuple of integers, does not include the samples axis)
-        when using this layer as the first layer in a model.
-    # Output shape
-        Same shape as the input.
-    # Arguments
-        l: lower bound of the uniform distribution, default is 1/8
-        u: upper bound of the uniform distribution, default is 1/3
-    # References
-        - [Empirical Evaluation of Rectified Activations in Convolution Network](https://arxiv.org/pdf/1505.00853v2.pdf)
-    '''
-
-    def __init__(self, l=1 / 10., u=1 / 9., **kwargs):
-        self.supports_masking = True
-        self.l = l
-        self.u = u
-        self.average = (l + u) / 2
-        self.uses_learning_phase = True
-        super(RReLU, self).__init__(**kwargs)
-
-    def call(self, x, mask=None):
-        return K.in_train_phase(K.relu(x, np.random.uniform(self.l, self.u)),
-                                K.relu(x, self.average))
-
-    def build(self, input_shape):
-        super(RReLU, self).build(input_shape)
-
-    def get_config(self):
-        config = {'l': self.l, 'u': self.u}
-        base_config = super(RReLU, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
-
-    # def compute_output_shape(self, input_shape):
-    #     return input_shape
-
-saved_model = load_model('./best_modelinc0.h5',custom_objects={'RReLU': RReLU})
+#saved_model = load_model('./best_modelinc0.h5',custom_objects={'RReLU': RReLU})
 
 
 # Define model here ---------------------------------------------------
-def build_model():
+def build_model(saved_model):
     """Function returning keras model instance.
-    
+    :parameter saved_model:model to computer backpropagation
     Model can be
      - Trained here
      - Loaded with load_model
@@ -130,7 +73,7 @@ def normalize(x):
     return (x + 1e-10) / (K.sqrt(K.mean(K.square(x))) + 1e-10)
 
 
-def build_guided_model():
+def build_guided_model(saved_model):
     """Function returning modified model.
     
     Changes gradient function for all ReLu activations
@@ -146,7 +89,7 @@ def build_guided_model():
     #g = tf.compat.v1.get_default_graph()
     g=tf.get_default_graph()
     with g.gradient_override_map({'Relu': 'GuidedBackProp'}):
-        new_model = build_model()
+        new_model = build_model(saved_model)
     return new_model
 
 
