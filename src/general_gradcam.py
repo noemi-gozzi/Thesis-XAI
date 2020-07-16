@@ -44,7 +44,7 @@ def compute_gradcam(patient, Xtest):
 
     ###divide dataset per label
     Xtest_list=[]
-    for label in range(len(np.unique(labels_preds))):
+    for label in np.unique(labels_preds):
         Xtest_list.append(Xtest[labels_preds==label])
 
     # for label in range (np.unique(labels_preds)):
@@ -55,12 +55,24 @@ def compute_gradcam(patient, Xtest):
     label=0
 
     gradcam_result={}
-    for label in range(7,8):
+    try:
+        with open('../resources/gradcam_results_patient1.pkl', 'rb') as f:
+            gradcam_result = pickle.load(f)
+    except FileNotFoundError:
+        print("create file")
+        gradcam_result = {}
+
+    for label in np.unique(labels_preds):
     # for label in range(len(np.unique(labels_preds))):
-        gradcam_value = np.zeros((50, 10, 512))
+
+        if label in gradcam_result:
+            print(label)
+            continue
         X_tmp = Xtest_list[label]
-        number_instances=X_tmp.shape[0]
-        for index in range(50):
+        gradcam_value = np.zeros((X_tmp.shape[0], 10, 512))
+
+
+        for index in range(X_tmp.shape[0]):
             gradcam, gb, guided_gradcam = compute_saliency(saved_model, guided_model, './ciao.png',
                                                        np.expand_dims(X_tmp[index, :, :, :], axis=0),
                                                             layer_name='conv2d_140',
@@ -76,11 +88,15 @@ def compute_gradcam(patient, Xtest):
 
         plt.show()
         gradcam_result[label]={'gradcam_values': gradcam_value, 'mean': mean_val}
+        with open(
+                '../resources/gradcam_results_patient1.pkl',
+                'wb') as f:
+            pickle.dump(gradcam_result, f)
     return gradcam_result
 
 if __name__ == "__main__":
     # tempraory dataset
-    with open('/tmp/Xtest_tmp.pkl', 'rb') as f:
+    with open('../resources/Xtest_tmp.pkl', 'rb') as f:
         Xtest = pickle.load(f)
     ##model
 
