@@ -30,7 +30,7 @@ import pandas as pd
 
 def compute_gradcam(patient, Xtest):
 
-    saved_model = load_model(('../resources/best_models/best_modelinc{}.h5'.format(patient)), custom_objects={'RReLU': RReLU})
+    saved_model = load_model('C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\best_models\\best_1D_pat_{}.h5'.format(0),custom_objects={'RReLU': RReLU})
     ####preds array
     preds=saved_model.predict(Xtest)
     labels_preds=np.argmax((preds), axis=1)
@@ -56,7 +56,7 @@ def compute_gradcam(patient, Xtest):
 
     gradcam_result={}
     try:
-        with open('../resources/gradcam_results_patient1.pkl', 'rb') as f:
+        with open('../resources/gradcam_results_patient1_conv_1D.pkl', 'rb') as f:
             gradcam_result = pickle.load(f)
     except FileNotFoundError:
         print("create file")
@@ -75,7 +75,7 @@ def compute_gradcam(patient, Xtest):
         for index in range(X_tmp.shape[0]):
             gradcam, gb, guided_gradcam = compute_saliency(saved_model, guided_model, './ciao.png',
                                                        np.expand_dims(X_tmp[index, :, :, :], axis=0),
-                                                            layer_name='conv2d_140',
+                                                            layer_name='conv5',
                                                             cls=-1, visualize=False, save=False)
             gradcam_value[index, :, :]=gradcam
         mean_val = np.mean((gradcam_value), axis=0)
@@ -83,13 +83,13 @@ def compute_gradcam(patient, Xtest):
         plt.imshow(mean_val, cmap='jet', aspect='auto', alpha=0.5)
         # plt.imshow(x[0,:,:,0], cmap='Greys')
         plt.savefig(
-            '../resources/images/gradcam_label{}_meanvalue_50.jpg'.format(
+            '../resources/images/gradcam_label{}_conv_1D.jpg'.format(
                 label))
 
         plt.show()
         gradcam_result[label]={'gradcam_values': gradcam_value, 'mean': mean_val}
         with open(
-                '../resources/gradcam_results_patient1.pkl',
+                '../resources/gradcam_results_patient1_conv_1D.pkl',
                 'wb') as f:
             pickle.dump(gradcam_result, f)
     return gradcam_result
