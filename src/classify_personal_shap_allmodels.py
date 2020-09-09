@@ -94,36 +94,92 @@ def shap_values (path_shap):
     X_train, y_train, X_test, y_test = load_dataset()
     num_patient = len(X_train)
     random_seed = 0;
-    n_estimators = 100;
-    model=ExtraTreesClassifier(n_estimators=n_estimators, random_state=random_seed)
-    shap_list=[]
-    for patient in range(num_patient):
-        model.fit(X_train[patient], y_train[patient])
-        shap_explainer = shap.TreeExplainer(model)
-        shap_values = shap_explainer.shap_values(X_test[patient])
-        # path_img_bar = path_shap + "patient{}_allclasses.png".format(patient)
-        # plt.figure()
-        # shap.summary_plot(shap_values, X_test[patient], plot_type="bar", show=False)
-        # plt.savefig(path_img_bar)
-        for i in range(len(shap_values)):
-            shap_df = pd.DataFrame(data=shap_values[i], columns=X_test[i].columns.values)
-            shap_list.append(shap_df)
-        with open(
-                '../resources/shap_extratrees_patient_{}_tmp.pkl'.format(patient),
-                'wb') as f:
-            pickle.dump(shap_list, f)
+    n_estimators = 50;
+    models = {'LDA': LinearDiscriminantAnalysis(solver='svd'),
+              'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True),
+        'KNN': KNeighborsClassifier(n_neighbors=40)
+    }
+    for model_name in models.keys():
+        print(model_name)
+        #for each model train the model for each patient and compute shap values
+        for patient in range(num_patient):
+            shap_list=[]
+            print((patient))
+            #training
+            model=models[model_name]
+            model.fit(X_train[patient], y_train[patient])
+            #create explainer
+            shap_explainer = shap.KernelExplainer(model.predict_proba, X_train[patient].iloc[0:100, :])
+            shap_values = shap_explainer.shap_values(X_test[patient].iloc[0:100,:])
+            for i in range(len(shap_values)):
+                shap_df=pd.DataFrame(data = shap_values[i], columns = X_test[i].columns.values)
+                shap_list.append(shap_df)
+            path_img_bar = path_shap + "model{}_patient{}_allclasses_tmp.png".format(model_name,patient)
+            plt.figure()
+            shap.summary_plot(shap_values, X_test[patient], plot_type="bar", show=False)
+            plt.savefig(path_img_bar)
 
-        # for value in range(len(shap_values)):
-        #     path_img_dot = path_shap + "dot_patient{}_class{}.png".format(patient, value)
-        #     plt.figure()
-        #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="dot", show=False)
-        #     plt.savefig(path_img_dot)
-        #     plt.close()
-        #     plt.figure()
-        #     path_img_bar = path_shap + "bar_patient{}_class{}.png".format(patient, value)
-        #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="bar", show=False)
-        #     plt.savefig(path_img_bar)
-        #     plt.close()
+            with open(
+                    '../resources/shap_{}_patient_{}_tmp.pkl'.format(model_name,patient),
+                    'wb') as f:
+                pickle.dump(shap_list, f)
+            # for value in range(len(shap_values)):
+            #     path_img_dot = path_shap + "dot_patient{}_class{}.png".format(patient, value)
+            #     plt.figure()
+            #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="dot", show=False)
+            #     plt.savefig(path_img_dot)
+            #     plt.close()
+            #     plt.figure()
+            #     path_img_bar = path_shap + "bar_patient{}_class{}.png".format(patient, value)
+            #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="bar", show=False)
+            #     plt.savefig(path_img_bar)
+            #     plt.close()
+    return
+
+def shap_values_tree (path_shap):
+    X_train, y_train, X_test, y_test = load_dataset()
+    num_patient = len(X_train)
+    random_seed = 0;
+    n_estimators = 50;
+    models = {'ExtremelyRandomizedTrees': ExtraTreesClassifier(n_estimators=n_estimators,
+                                                                 random_state=random_seed),
+    }
+    for model_name in models.keys():
+        print(model_name)
+        #for each model train the model for each patient and compute shap values
+        for patient in range(3,num_patient):
+            shap_list=[]
+            print((patient))
+            #training
+            model=models[model_name]
+            model.fit(X_train[patient], y_train[patient])
+            #create explainer
+            shap_explainer = shap.TreeExplainer(model, X_train[patient].iloc[0:1000, :])
+            print(X_test[patient].shape)
+            shap_values = shap_explainer.shap_values(X_test[patient])
+            for i in range(len(shap_values)):
+                shap_df=pd.DataFrame(data = shap_values[i], columns = X_test[i].columns.values)
+                shap_list.append(shap_df)
+            path_img_bar = path_shap + "model{}_patient{}_allclasses_background_data.png".format(model_name,patient)
+            plt.figure()
+            shap.summary_plot(shap_values, X_test[patient], plot_type="bar", show=False)
+            plt.savefig(path_img_bar)
+
+            with open(
+                    '../resources/shap_{}_patient_{}_background_data.pkl'.format(model_name,patient),
+                    'wb') as f:
+                pickle.dump(shap_list, f)
+            # for value in range(len(shap_values)):
+            #     path_img_dot = path_shap + "dot_patient{}_class{}.png".format(patient, value)
+            #     plt.figure()
+            #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="dot", show=False)
+            #     plt.savefig(path_img_dot)
+            #     plt.close()
+            #     plt.figure()
+            #     path_img_bar = path_shap + "bar_patient{}_class{}.png".format(patient, value)
+            #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="bar", show=False)
+            #     plt.savefig(path_img_bar)
+            #     plt.close()
     return
 
 def shap_values_svm (path_shap):
@@ -188,8 +244,8 @@ if __name__ == "__main__":
 
     #####calculate shap values for each patient for some type of trees.
 
-    path_shap = "../resources/shap_SVM/"
-    shap_values(path_shap)
+    path_shap = "../resources/"
+    shap_values_tree(path_shap)
 
     # X_train, y_train, X_test, y_test = load_dataset()
     # num_patient = len(X_train)
