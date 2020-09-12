@@ -32,7 +32,7 @@ def build_model(saved_model):
 
 #H, W = 299, 299 # Input shape, defined by the model (model.input_shape)
 #H, W = 224, 224
-H,W=10, 512
+#H,W=10, 512
 
 # ---------------------------------------------------------------------
 
@@ -103,8 +103,17 @@ def guided_backprop(input_model, images, layer_name):
     return grads_val
 
 
-def grad_cam(input_model, image, cls, layer_name):
-    """GradCAM method for visualizing input saliency."""
+def grad_cam(input_model, image, cls, layer_name, H, W):
+    """GradCAM method for visualizing input saliency.
+    :param input_model: trained CNN model
+    :param image: image to be explained. dimension (1xHxWxD) D:(BW iamges or RGB)
+    :param cls: label of the image
+    :param layer_name: last conv layer name
+    :param H: Height
+    :param W: Width
+    :return:Cam values (pixel importance of the input)
+    """
+    #score for class c
     y_c = input_model.output[0, cls]
     conv_output = input_model.get_layer(layer_name).output
     grads = K.gradients(y_c, conv_output)[0]
@@ -112,13 +121,16 @@ def grad_cam(input_model, image, cls, layer_name):
     # grads = normalize(grads)
     gradient_function = K.function([input_model.input], [conv_output, grads])
 
-    output, grads_val = gradient_function([image])
-    output, grads_val = output[0, :], grads_val[0, :, :, :]
+    #output and grad_vals dimension conv layer (UxVxNum feature maps)
+    output, grads_val = gradient_function([image]) #(e.g. 1x10x32x64 for Conv1D with "Conv5")
+    output, grads_val = output[0, :], grads_val[0, :, :, :] #(e.g. 10x32x64 for Conv1D with "Conv5")
 
+    #alpha weights (output number of feature maps e.g. (64,))
     weights = np.mean(grads_val, axis=(0, 1))
+    #cam value (dimension of the last layer e.g. 10x32)
     cam = np.dot(output, weights)
 
-    # Process CAM
+    # Process CAM and resive to the input image dimension
     cam = cv2.resize(cam, (W, H), cv2.INTER_LINEAR)
     cam = np.maximum(cam, 0)
     cam_max = cam.max()
@@ -151,10 +163,8 @@ def grad_cam_batch(input_model, images, classes, layer_name):
     return new_cams
 
 
-def compute_saliency(model, guided_model, img_path, preprocessed_input, layer_name='block5_conv3', cls=-1, visualize=True, save=True):
+def compute_saliency(model, guided_model, preprocessed_input, H, W, layer_name='block5_conv3', cls=-1, visualize=True, save=True, img_path="../resources/images"):
     """Compute saliency using all three approaches.
-        -layer_name: layer to compute gradients;
-        -cls: class number to localize (-1 for most probable class).
     """
     #preprocessed_input = load_image(img_path)
 
@@ -171,7 +181,7 @@ def compute_saliency(model, guided_model, img_path, preprocessed_input, layer_na
     # class_name = decode_predictions(np.eye(1, 1000, cls))[0][0][1]
     # print("Explanation for '{}'".format(class_name))
 
-    gradcam = grad_cam(model, preprocessed_input, cls, layer_name)
+    gradcam = grad_cam(model, preprocessed_input, cls, layer_name, H, W)
     gb = guided_backprop(guided_model, preprocessed_input, layer_name)
     guided_gradcam = gb * gradcam[..., np.newaxis]
 
