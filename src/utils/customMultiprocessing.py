@@ -32,7 +32,7 @@ def surnameFunction(name, index):
 
 
 if __name__ == "__main__":
-    possible_names = ["noemi", "federico", "isola d'elba"]
+    possible_names = ["noemi", "ciao", "isola d'elba"]
     result = customMultiprocessing(surnameFunction, [possible_names, 1])
     for el in result:
         print(el)
