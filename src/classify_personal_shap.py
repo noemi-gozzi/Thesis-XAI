@@ -1,3 +1,8 @@
+"""
+File for classification with classical machine learning and SHAP values extraction
+for svm and tree ensemble
+"""
+
 import pandas as pd  # version 0.24.2
 import numpy as np  # version 1.16.4
 import random
@@ -15,11 +20,13 @@ from utils.customMultiprocessing import customMultiprocessing
 from utils.load_data import load_dataset
 import pickle
 import copy
-#import shap.explainers._sampling as shap if this, use Sampling
-import shap #if this use samplingexplainer
+# import shap.explainers._sampling as shap if this, use Sampling
+import shap  # if this use samplingexplainer
 from sklearn.model_selection import GridSearchCV
 
+
 def classify_personalized(file_path):
+
     X_train, y_train, X_test, y_test = load_dataset()
     num_patient = len(X_train)
     random_seed = 0;
@@ -59,7 +66,7 @@ def classify_personalized(file_path):
 
         score = {}
         # for model_name in models:
-        #params_list = [list(models.values()), x_train.copy(), y_train.copy(), x_test.copy(), y_test.copy(), list(models.keys())]
+        # params_list = [list(models.values()), x_train.copy(), y_train.copy(), x_test.copy(), y_test.copy(), list(models.keys())]
         params_list = [list(models.values()), X_train[patient], y_train[patient], X_test[patient], y_test[patient],
                        list(models.keys())]
         results = customMultiprocessing(model_fit, params_list, pool_size=8)
@@ -90,13 +97,14 @@ def model_fit(model, x_train, y_train, x_test, y_test, model_name):
 
     return score
 
-def shap_values (path_shap):
+
+def shap_values(path_shap):
     X_train, y_train, X_test, y_test = load_dataset()
     num_patient = len(X_train)
     random_seed = 0;
     n_estimators = 100;
-    model=ExtraTreesClassifier(n_estimators=n_estimators, random_state=random_seed)
-    shap_list=[]
+    model = ExtraTreesClassifier(n_estimators=n_estimators, random_state=random_seed)
+    shap_list = []
     for patient in range(num_patient):
         model.fit(X_train[patient], y_train[patient])
         shap_explainer = shap.TreeExplainer(model)
@@ -126,10 +134,11 @@ def shap_values (path_shap):
         #     plt.close()
     return
 
-def shap_values_svm (path_shap):
+
+def shap_values_svm(path_shap):
     X_train, y_train, X_test, y_test = load_dataset()
     num_patient = len(X_train)
-    model=SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
+    model = SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
     for patient in range(num_patient):
         model.fit(X_train[patient], y_train[patient])
         explainer = shap.SamplingExplainer(model.predict_proba, X_train[patient].iloc[0:100, :])
@@ -175,16 +184,16 @@ def grid_search_algorithm(classifier, parameters, X_train, y_train, X_test, y_te
     # TEST ON YOUR TEST SET
     best_model = gs.best_estimator_
     y_pred = best_model.predict(X_test)
-    acc= metrics.accuracy_score(y_test, y_pred)
-    f1=metrics.f1_score(y_test, y_pred, average="weighted")
+    acc = metrics.accuracy_score(y_test, y_pred)
+    f1 = metrics.f1_score(y_test, y_pred, average="weighted")
     return {'acc': acc, 'f1': f1, 'best model': best_model}
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     #####CLASSIFY each patient separately
-    #file_path = 'C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources' \
+    # file_path = 'C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources' \
     #            '\\results_classification\\scores_personalized_models.pkl '
-    #classify_personalized(file_path)
+    # classify_personalized(file_path)
 
     #####calculate shap values for each patient for some type of trees.
 

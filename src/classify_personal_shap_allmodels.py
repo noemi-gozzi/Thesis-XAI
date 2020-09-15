@@ -109,8 +109,8 @@ def shap_values (path_shap):
             model=models[model_name]
             model.fit(X_train[patient], y_train[patient])
             #create explainer
-            shap_explainer = shap.KernelExplainer(model.predict_proba, X_train[patient].iloc[0:100, :])
-            shap_values = shap_explainer.shap_values(X_test[patient].iloc[0:100,:])
+            shap_explainer = shap.KernelExplainer(model.predict_proba, X_train[patient].iloc[0:1000, :])
+            shap_values = shap_explainer.shap_values(X_test[patient])
             for i in range(len(shap_values)):
                 shap_df=pd.DataFrame(data = shap_values[i], columns = X_test[i].columns.values)
                 shap_list.append(shap_df)
