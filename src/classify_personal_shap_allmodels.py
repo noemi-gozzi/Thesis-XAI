@@ -91,10 +91,15 @@ def model_fit(model, x_train, y_train, x_test, y_test, model_name):
     return score
 
 def shap_values (path_shap):
-    X_train, y_train, X_test, y_test = load_dataset()
+    with open("../X_train.pkl", 'rb') as f:
+        X_train = pickle.load(f)
+    with open("../X_test.pkl", 'rb') as f:
+        X_test = pickle.load(f)
+    with open("../y_train.pkl", 'rb') as f:
+        y_train = pickle.load(f)
+    with open("../y_test.pkl", 'rb') as f:
+        y_test = pickle.load(f)
     num_patient = len(X_train)
-    random_seed = 0;
-    n_estimators = 50;
     models = {'LDA': LinearDiscriminantAnalysis(solver='svd'),
               'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
         #'KNN': KNeighborsClassifier(n_neighbors=40)
@@ -109,15 +114,15 @@ def shap_values (path_shap):
             model=models[model_name]
             model.fit(X_train[patient], y_train[patient])
             #create explainer
-            shap_explainer = shap.KernelExplainer(model.predict_proba, X_train[patient].iloc[0:1000, :])
+            shap_explainer = shap.KernelExplainer(model.predict_proba, X_train[patient].iloc[0:500, :])
             shap_values = shap_explainer.shap_values(X_test[patient])
             for i in range(len(shap_values)):
                 shap_df=pd.DataFrame(data = shap_values[i], columns = X_test[i].columns.values)
                 shap_list.append(shap_df)
-            path_img_bar = path_shap + "model{}_patient{}_allclasses_tmp.png".format(model_name,patient)
-            plt.figure()
-            shap.summary_plot(shap_values, X_test[patient], plot_type="bar", show=False)
-            plt.savefig(path_img_bar)
+            #path_img_bar = path_shap + "model{}_patient{}_allclasses_tmp.png".format(model_name,patient)
+            #plt.figure()
+            #shap.summary_plot(shap_values, X_test[patient], plot_type="bar", show=False)
+            #plt.savefig(path_img_bar)
 
             with open(
                     '../resources/shap_{}_patient_{}_tmp.pkl'.format(model_name,patient),
@@ -181,59 +186,6 @@ def shap_values_tree (path_shap):
             #     plt.savefig(path_img_bar)
             #     plt.close()
     return
-
-def shap_values_svm (path_shap):
-    X_train, y_train, X_test, y_test = load_dataset()
-    num_patient = len(X_train)
-    model=SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
-    for patient in range(num_patient):
-        model.fit(X_train[patient], y_train[patient])
-        explainer = shap.SamplingExplainer(model.predict_proba, X_train[patient].iloc[0:100, :])
-        shap_values = explainer.shap_values(X_test[patient])
-
-        with open(
-                '../resources/shap_SVM/shap_svm_patient_{}_SVM.pkl'.format(patient),
-                'wb') as f:
-            pickle.dump(shap_values, f)
-        path_img_bar = path_shap + "patient{}_svm.png".format(patient)
-        plt.figure()
-        shap.summary_plot(shap_values, X_test[patient], plot_type="bar", show=False)
-        plt.savefig(path_img_bar)
-
-        # for value in range(len(shap_values)):
-        #     path_img_dot = path_shap + "dot_patient{}_class{}.png".format(patient, value)
-        #     plt.figure()
-        #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="dot", show=False)
-        #     plt.savefig(path_img_dot)
-        #     plt.close()
-        #     plt.figure()
-        #     path_img_bar = path_shap + "bar_patient{}_class{}.png".format(patient, value)
-        #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="bar", show=False)
-        #     plt.savefig(path_img_bar)
-        #     plt.close()
-    return
-
-
-def grid_search_algorithm(classifier, parameters, X_train, y_train, X_test, y_test):
-    gs = GridSearchCV(classifier, parameters, cv=3, scoring='accuracy', n_jobs=-1, refit=True)
-    gs = gs.fit(X_train, y_train)
-    # summarize the results of your GRIDSEARCH
-    print('***GRIDSEARCH RESULTS***')
-
-    print("Best score: %f using %s" % (gs.best_score_, gs.best_params_))
-    means = gs.cv_results_['mean_test_score']
-    stds = gs.cv_results_['std_test_score']
-    params = gs.cv_results_['params']
-
-    for mean, stdev, param in zip(means, stds, params):
-        print("%f (%f) with: %r" % (mean, stdev, param))
-
-    # TEST ON YOUR TEST SET
-    best_model = gs.best_estimator_
-    y_pred = best_model.predict(X_test)
-    acc= metrics.accuracy_score(y_test, y_pred)
-    f1=metrics.f1_score(y_test, y_pred, average="weighted")
-    return {'acc': acc, 'f1': f1, 'best model': best_model}
 
 if __name__ == "__main__":
 
