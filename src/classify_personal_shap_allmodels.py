@@ -96,8 +96,8 @@ def shap_values (path_shap):
     random_seed = 0;
     n_estimators = 50;
     models = {'LDA': LinearDiscriminantAnalysis(solver='svd'),
-              'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True),
-        'KNN': KNeighborsClassifier(n_neighbors=40)
+              'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
+        #'KNN': KNeighborsClassifier(n_neighbors=40)
     }
     for model_name in models.keys():
         print(model_name)
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     #####calculate shap values for each patient for some type of trees.
 
     path_shap = "../resources/"
-    shap_values_tree(path_shap)
+    shap_values(path_shap)
 
     # X_train, y_train, X_test, y_test = load_dataset()
     # num_patient = len(X_train)
