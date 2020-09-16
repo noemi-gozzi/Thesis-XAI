@@ -52,4 +52,4 @@ def visualize_gradcam(Xtest, patient):
 if __name__ == "__main__":
     with open(root_path + '/resources/data/Xtest_correct.pkl', 'rb') as f:
         Xtest = pickle.load(f)
-    visualize_gradcam(Xtest, patient=0)
+    visualize_gradcam(Xtest, patient=1)

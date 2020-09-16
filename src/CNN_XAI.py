@@ -1,29 +1,19 @@
-import sys
-import os
+"""
+Temporary file to test different gradcam function. it works on one image
+the model is uploaded and so Xtest
+
+"""
 import numpy as np
 import pickle
 import cv2
 from matplotlib import pyplot as plt
-
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-#import kapre
-import keras
-import keras.utils as ku
-
-from keras.layers import Conv2D, LocallyConnected2D, Conv2DTranspose, Flatten, Dense, LeakyReLU, PReLU, Input, add, Layer
-from keras.layers import BatchNormalization, UpSampling2D, Activation, Dropout, MaxPooling2D, AveragePooling2D
-from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateScheduler, ReduceLROnPlateau, TensorBoard
 from keras.models import Sequential, load_model, Model
-from keras.utils import to_categorical, plot_model
-from keras.metrics import mean_squared_error
-from keras.optimizers import Adam, RMSprop, SGD
-from keras.initializers import RandomNormal
-import keras.backend as K
-
 from utils.utils_classes import RReLU
+from guided_grad_cam_our_model import build_model,load_image, deprocess_image, normalize,build_guided_model, guided_backprop, grad_cam, grad_cam_batch, compute_saliency
 from utils.load_data_CNN import load_data_CNN
 from original_grad_cam import grad_cam2
+
 # Xtrainset, Ytrainset, Xtestset, Ytestset=load_data_CNN()
 # num_patient=len(Xtrainset)
 with open('../resources/data/Xtest_correct.pkl', 'rb') as f:
@@ -51,8 +41,6 @@ Xtest_expand=np.expand_dims(Xtest[0], axis=0)
 print(np.argmax(preds[0]))
 
 predicted_class=np.argmax(saved_model.predict(np.expand_dims(Xtest[0], axis=0)))
-
-from guided_grad_cam_our_model import build_model,load_image, deprocess_image, normalize,build_guided_model, guided_backprop, grad_cam, grad_cam_batch, compute_saliency
 model_tmp=build_model(saved_model)
 guided_model = build_guided_model(saved_model)
 guided_model.summary()
