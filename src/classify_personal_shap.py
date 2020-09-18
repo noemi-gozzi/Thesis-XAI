@@ -25,23 +25,23 @@ import shap  # if this use samplingexplainer
 from sklearn.model_selection import GridSearchCV
 
 
-def classify_personalized(file_path):
+def classify_personalized(file_path, X_train, y_train, X_test, y_test):
 
-    X_train, y_train, X_test, y_test = load_dataset()
+    #X_train, y_train, X_test, y_test = load_dataset()
     num_patient = len(X_train)
     random_seed = 0;
     n_estimators = 50;
     models = {'LDA': LinearDiscriminantAnalysis(solver='svd'),
               # 'Decision Tree': DecisionTreeClassifier(max_depth=None,
               #                                        random_state=random_seed),
-              'Bagging': BaggingClassifier(DecisionTreeClassifier(max_depth=15), n_estimators=n_estimators,
-                                           random_state=random_seed),
+              #'Bagging': BaggingClassifier(DecisionTreeClassifier(max_depth=15), n_estimators=n_estimators,
+              #                             random_state=random_seed),
               'Random Forest': RandomForestClassifier(n_estimators=n_estimators,
                                                       random_state=random_seed),
               'Extremely Randomized Trees': ExtraTreesClassifier(n_estimators=n_estimators,
                                                                  random_state=random_seed),
-              'Ada Boost': AdaBoostClassifier(DecisionTreeClassifier(max_depth=15), n_estimators=n_estimators,
-                                              random_state=random_seed),
+              #'Ada Boost': AdaBoostClassifier(DecisionTreeClassifier(max_depth=15), n_estimators=n_estimators,
+              #                                random_state=random_seed),
               'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True),
               'KNN': KNeighborsClassifier(n_neighbors=40)
               # 'Logistic Regression': LogisticRegression(solver='liblinear', multi_class='ovr', C=1.0,
@@ -59,10 +59,6 @@ def classify_personalized(file_path):
             print(patient)
             continue
         print("patient:", patient)
-        # x_train = X_train[patient].copy()
-        # y_train = y_train[patient].copy()
-        # x_test = X_test[patient].copy()
-        # y_test = y_test[patient].copy()
 
         score = {}
         # for model_name in models:
@@ -191,14 +187,20 @@ def grid_search_algorithm(classifier, parameters, X_train, y_train, X_test, y_te
 
 if __name__ == "__main__":
     #####CLASSIFY each patient separately
-    # file_path = 'C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources' \
-    #            '\\results_classification\\scores_personalized_models.pkl '
-    # classify_personalized(file_path)
+    file_path = '../resources/results_classification/classification_featureset_wo_ssc_hpc.pkl'
+    X_train, y_train, X_test, y_test=load_dataset()
+
+    for patient in range(11):
+        for i in range(1, 11):
+            X_test[patient] = X_test[patient].drop(["SSC{}".format(i), "HP_C{}".format(i)], axis=1)
+            X_train[patient] = X_train[patient].drop(["SSC{}".format(i), "HP_C{}".format(i)], axis=1)
+
+    classify_personalized(file_path,  X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
 
     #####calculate shap values for each patient for some type of trees.
 
-    path_shap = "../resources/shap_SVM/"
-    shap_values(path_shap)
+    # path_shap = "../resources/shap_SVM/"
+    # shap_values(path_shap)
 
     # X_train, y_train, X_test, y_test = load_dataset()
     # num_patient = len(X_train)
