@@ -126,7 +126,7 @@ def shap_values (path_shap):
             #plt.savefig(path_img_bar)
 
             with open(
-                    '../resources/prova.pkl'.format(model_name,patient),
+                    '../resources/prova{}{}.pkl'.format(model_name,patient),
                     'wb') as f:
                 pickle.dump(shap_list, f)
             # for value in range(len(shap_values)):
