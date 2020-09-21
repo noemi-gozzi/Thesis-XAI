@@ -46,6 +46,7 @@ for index,model in enumerate(models):
     plt.ylim([0.75,1])
     plt.legend(["Complete set of features", "Feature set without SSC and HP_C"], fontsize=10, loc="lower right")
     plt.title(model)
-    plt.show()
     plt.savefig("C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\results_classification\\{}.jpg".format(model))
+
+    plt.show()
 

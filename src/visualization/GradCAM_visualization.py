@@ -20,7 +20,7 @@ def visualize_gradcam(Xtest, patient):
     :param patient: patient
     :return:
     """
-    path = root_path + "/resources/gradcam_results_patient{}_conv_1D.pkl".format(patient)
+    path = root_path + "/resources/Grad-CAM/gradcam_results_patient{}_conv_1D.pkl".format(patient)
     with open(path, 'rb') as f:
         gradcam = pickle.load(f)
 
@@ -45,6 +45,7 @@ def visualize_gradcam(Xtest, patient):
         mean_val = np.average(gradcam_value, axis=0)
         plt.figure(figsize=(30, 10))
         plt.imshow(mean_val, cmap='jet', aspect='auto', alpha=0.5)
+        plt.savefig(root_path + "/resources/Grad-CAM/gradcam_patient{}_label{}.jpg".format(patient, cls))
         plt.show()
     return
 
@@ -52,4 +53,4 @@ def visualize_gradcam(Xtest, patient):
 if __name__ == "__main__":
     with open(root_path + '/resources/data/Xtest_correct.pkl', 'rb') as f:
         Xtest = pickle.load(f)
-    visualize_gradcam(Xtest, patient=1)
+    visualize_gradcam(Xtest, patient=9)
