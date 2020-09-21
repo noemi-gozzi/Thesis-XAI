@@ -111,10 +111,10 @@ def shap_values (path_shap):
         model = models[model_name]
         params_list = [list(range(0,num_patient)), model, X_train, y_train, X_test, y_test]
         SHAP=customMultiprocessing(shap_multiprocessing, params_list, pool_size=8)
-        with open(
-                '../resources/shap_SVM_all_patients.pkl',
-                'wb') as f:
-            pickle.dump(SHAP, f)
+        # with open(
+        #         '../resources/shap_SVM_all_patients.pkl',
+        #         'wb') as f:
+        #     pickle.dump(SHAP, f)
         # SHAP_TOT = {}
         # for shap in SHAP:
         #     SHAP_TOT.update(shap)
@@ -151,11 +151,11 @@ def shap_multiprocessing(patient, model, X_train, y_train, X_test, y_test):
     # shap.summary_plot(shap_values, X_test[patient], plot_type="bar", show=False)
     # plt.savefig(path_img_bar)
 
-    # with open(
-    #         '../resources/shap_prova_SVM_patient_{}_tmp.pkl'.format(patient),
-    #         'wb') as f:
-    #     pickle.dump(shap_list, f)
-    return shap_values
+    with open(
+            '../resources/shap_prova_SVM_patient_{}_tmp.pkl'.format(patient),
+            'wb') as f:
+        pickle.dump(shap_values, f)
+    return 1
 
 def shap_values_tree (path_shap):
     X_train, y_train, X_test, y_test = load_dataset()
