@@ -100,6 +100,7 @@ def shap_values (path_shap):
     with open("../y_test.pkl", 'rb') as f:
         y_test = pickle.load(f)
     num_patient = len(X_train)
+
     models = {'LDA': LinearDiscriminantAnalysis(solver='svd')
               #'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
         #'KNN': KNeighborsClassifier(n_neighbors=40)
@@ -107,7 +108,7 @@ def shap_values (path_shap):
     for model_name in models.keys():
         print(model_name)
         #for each model train the model for each patient and compute shap values
-        for patient in range(num_patient):
+        for patient in range(0,3):
             shap_list=[]
             print((patient))
             #training
