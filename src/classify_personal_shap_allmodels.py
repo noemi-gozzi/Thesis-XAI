@@ -100,8 +100,8 @@ def shap_values (path_shap):
     with open("../y_test.pkl", 'rb') as f:
         y_test = pickle.load(f)
     num_patient = len(X_train)
-    models = {'LDA': LinearDiscriminantAnalysis(solver='svd'),
-              'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
+    models = {'LDA': LinearDiscriminantAnalysis(solver='svd')
+              #'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
         #'KNN': KNeighborsClassifier(n_neighbors=40)
     }
     for model_name in models.keys():
@@ -114,8 +114,8 @@ def shap_values (path_shap):
             model=models[model_name]
             model.fit(X_train[patient], y_train[patient])
             #create explainer
-            shap_explainer = shap.KernelExplainer(model.predict_proba, X_train[patient].iloc[0:500, :])
-            shap_values = shap_explainer.shap_values(X_test[patient])
+            shap_explainer = shap.KernelExplainer(model.predict_proba, X_train[patient].iloc[0:100, :])
+            shap_values = shap_explainer.shap_values(X_test[patient][0:20])
             for i in range(len(shap_values)):
                 shap_df=pd.DataFrame(data = shap_values[i], columns = X_test[i].columns.values)
                 shap_list.append(shap_df)
@@ -125,7 +125,7 @@ def shap_values (path_shap):
             #plt.savefig(path_img_bar)
 
             with open(
-                    '../resources/shap_{}_patient_{}_tmp.pkl'.format(model_name,patient),
+                    '../resources/prova.pkl'.format(model_name,patient),
                     'wb') as f:
                 pickle.dump(shap_list, f)
             # for value in range(len(shap_values)):
