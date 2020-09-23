@@ -101,8 +101,8 @@ def shap_values (path_shap):
     with open("../y_test.pkl", 'rb') as f:
         y_test = pickle.load(f)
     num_patient = len(X_train)
-    models = {'LDA': LinearDiscriminantAnalysis(solver='svd')
-              #'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
+    models = {#'LDA': LinearDiscriminantAnalysis(solver='svd')
+              'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
         #'KNN': KNeighborsClassifier(n_neighbors=40)
     }
     for model_name in models.keys():
@@ -110,7 +110,7 @@ def shap_values (path_shap):
         #for each model train the model for each patient and compute shap values
         model = models[model_name]
         params_list = [list(range(0,num_patient)), model, X_train, y_train, X_test, y_test]
-        SHAP=customMultiprocessing(shap_multiprocessing, params_list, pool_size=8)
+        SHAP=customMultiprocessing(shap_multiprocessing, params_list, pool_size=11)
         # with open(
         #         '../resources/shap_SVM_all_patients.pkl',
         #         'wb') as f:
@@ -141,8 +141,8 @@ def shap_multiprocessing(patient, model, X_train, y_train, X_test, y_test):
     model.fit(X_train, y_train)
     # create explainer
     #shap_explainer = shap.KernelExplainer(model_list[patient].predict_proba, X_train.iloc[0:500, :])
-    shap_explainer = shap.KernelExplainer(model.predict_proba, X_train.iloc[0:10, :])
-    shap_values = shap_explainer.shap_values(X_test.iloc[0:10])
+    shap_explainer = shap.KernelExplainer(model.predict_proba, X_train.iloc[0:500, :])
+    shap_values = shap_explainer.shap_values(X_test)
     # for i in range(len(shap_values)):
     #     shap_df = pd.DataFrame(data=shap_values[i], columns=X_test[i].columns.values)
     #     shap_list.append(shap_df)
