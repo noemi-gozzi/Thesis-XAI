@@ -101,7 +101,9 @@ def shap_values (path_shap):
     with open("../y_test.pkl", 'rb') as f:
         y_test = pickle.load(f)
     num_patient = len(X_train)
-    models = {'LDA': LinearDiscriminantAnalysis(solver='svd')
+    models = {#'LDA': LinearDiscriminantAnalysis(solver='svd'),
+              'ExtremelyRandomizedTrees': ExtraTreesClassifier(n_estimators=50,
+                                                               random_state=0)
               #'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
         #'KNN': KNeighborsClassifier(n_neighbors=40)
     }
@@ -110,25 +112,8 @@ def shap_values (path_shap):
         #for each model train the model for each patient and compute shap values
         model = models[model_name]
         params_list = [list(range(0,num_patient)), model, X_train, y_train, X_test, y_test]
-        SHAP=customMultiprocessing(shap_multiprocessing, params_list, pool_size=8)
-        # with open(
-        #         '../resources/shap_SVM_all_patients.pkl',
-        #         'wb') as f:
-        #     pickle.dump(SHAP, f)
-        # SHAP_TOT = {}
-        # for shap in SHAP:
-        #     SHAP_TOT.update(shap)
-            # for value in range(len(shap_values)):
-            #     path_img_dot = path_shap + "dot_patient{}_class{}.png".format(patient, value)
-            #     plt.figure()
-            #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="dot", show=False)
-            #     plt.savefig(path_img_dot)
-            #     plt.close()
-            #     plt.figure()
-            #     path_img_bar = path_shap + "bar_patient{}_class{}.png".format(patient, value)
-            #     shap.summary_plot(shap_values[value], X_test[patient], plot_type="bar", show=False)
-            #     plt.savefig(path_img_bar)
-            #     plt.close()
+        SHAP=customMultiprocessing(shap_multiprocessing_tree, params_list, pool_size=8)
+
     return
 
 def shap_multiprocessing(patient, model, X_train, y_train, X_test, y_test):
@@ -157,6 +142,21 @@ def shap_multiprocessing(patient, model, X_train, y_train, X_test, y_test):
         pickle.dump(shap_values, f)
     return 1
 
+def shap_multiprocessing_tree(patient, model, X_train, y_train, X_test, y_test):
+
+    model.fit(X_train, y_train)
+    # create explainer
+    #shap_explainer = shap.KernelExplainer(model_list[patient].predict_proba, X_train.iloc[0:500, :])
+    shap_explainer = shap.TreeExplainer(model, X_train.iloc[0:1000, :])
+    shap_values = shap_explainer.shap_values(X_test)
+
+
+    with open(
+            '../resources/shap_XRT_patient_{}_background_data.pkl'.format(patient),
+            'wb') as f:
+        pickle.dump(shap_values, f)
+    return 1
+
 def shap_values_tree (path_shap):
     X_train, y_train, X_test, y_test = load_dataset()
     num_patient = len(X_train)
@@ -168,7 +168,7 @@ def shap_values_tree (path_shap):
     for model_name in models.keys():
         print(model_name)
         #for each model train the model for each patient and compute shap values
-        for patient in range(3,num_patient):
+        for patient in range(4,num_patient):
             shap_list=[]
             print((patient))
             #training
@@ -181,10 +181,10 @@ def shap_values_tree (path_shap):
             for i in range(len(shap_values)):
                 shap_df=pd.DataFrame(data = shap_values[i], columns = X_test[i].columns.values)
                 shap_list.append(shap_df)
-            path_img_bar = path_shap + "model{}_patient{}_allclasses_background_data.png".format(model_name,patient)
-            plt.figure()
-            shap.summary_plot(shap_values, X_test[patient], plot_type="bar", show=False)
-            plt.savefig(path_img_bar)
+            # path_img_bar = path_shap + "model{}_patient{}_allclasses_background_data.png".format(model_name,patient)
+            # plt.figure()
+            # shap.summary_plot(shap_values, X_test[patient], plot_type="bar", show=False)
+            # plt.savefig(path_img_bar)
 
             with open(
                     '../resources/shap_{}_patient_{}_background_data.pkl'.format(model_name,patient),
