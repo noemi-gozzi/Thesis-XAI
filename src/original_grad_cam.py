@@ -96,7 +96,7 @@ def grad_cam2(input_model, image, category_index, layer_name):
     target_layer = lambda x: target_category_loss(x, category_index, nb_classes)
     x = Lambda(target_layer, output_shape = target_category_loss_output_shape)(input_model.output)
     model = Model(inputs=input_model.input, outputs=x)
-    model.summary()
+    #model.summary()
     loss = K.sum(model.output)
     #conv_output =  [l for l in model.layers if l.name is layer_name][0].output
     conv_output=input_model.get_layer(layer_name).output
@@ -120,17 +120,39 @@ def grad_cam2(input_model, image, category_index, layer_name):
 
     cam = cv2.resize(cam, (512, 10), cv2.INTER_LINEAR)
     cam = np.maximum(cam, 0) #RELU
-    heatmap = cam / np.max(cam)
+    #heatmap = cam / np.max(cam)
 
-    #Return to BGR [0..255] from the preprocessed image
-    image = image[0, :]
-    image -= np.min(image)
-    image = np.minimum(image, 255)
 
-    cam = cv2.applyColorMap(np.uint8(255*heatmap), cv2.COLORMAP_JET)
-    cam = np.float32(cam) + np.float32(image)
-    cam = 255 * cam / np.max(cam)
-    return np.uint8(cam), heatmap
+    # #Return to BGR [0..255] from the preprocessed image
+    # image = image[0, :]
+    # image -= np.min(image)
+    # image = np.minimum(image, 255)
+
+    # cam = cv2.applyColorMap(np.uint8(255*heatmap), cv2.COLORMAP_JET)
+    # cam = np.float32(cam) + np.float32(image)
+    # cam = 255 * cam / np.max(cam)
+    return cam
+
+def compute_gradcam_2(model, preprocessed_input, layer_name='block5_conv3', cls=-1):
+    """Compute saliency using all three approaches.
+    """
+    #preprocessed_input = load_image(img_path)
+
+    predictions = model.predict(preprocessed_input)
+    # top_n = 5
+    # top = decode_predictions(predictions, top=top_n)[0]
+    # classes = np.argsort(predictions[0])[-top_n:][::-1]
+    # print('Model prediction:')
+    # for c, p in zip(classes, top):
+    #     print('\t{:15s}\t({})\twith probability {:.3f}'.format(p[1], c, p[2]))
+    if cls == -1:
+        cls = np.argmax(predictions)
+        print(cls)
+    # class_name = decode_predictions(np.eye(1, 1000, cls))[0][0][1]
+    # print("Explanation for '{}'".format(class_name))
+
+    cam= grad_cam2(model, preprocessed_input, cls, layer_name)
+    return cam
 
 # preprocessed_input = load_image("../resources/images/cat_dog.png")
 #

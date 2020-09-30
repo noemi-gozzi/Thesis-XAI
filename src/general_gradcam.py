@@ -10,7 +10,7 @@ import pickle
 import pandas as pd
 import cv2
 from utils.customMultiprocessing import customMultiprocessing
-
+from original_grad_cam import compute_gradcam_2
 
 # Xtrainset, Ytrainset, Xtestset, Ytestset=load_data_CNN()
 # num_patient=len(Xtrainset)
@@ -43,7 +43,7 @@ def compute_gradcam(patient, Xtest):
 
     label = 0
     try:
-        with open('../resources/gradcam_results_patient{}_conv_1D.pkl'.format(patient), 'rb') as f:
+        with open('../resources/gradcam_results_patient{}_conv_1D_method2.pkl'.format(patient), 'rb') as f:
             gradcam_result = pickle.load(f)
     except FileNotFoundError:
         print("create file")
@@ -56,28 +56,37 @@ def compute_gradcam(patient, Xtest):
             continue
         X_tmp = Xtest_list[label]
         gradcam_value = np.zeros((X_tmp.shape[0], 10, 512))
-
         print(X_tmp.shape[0])
         for index in range(X_tmp.shape[0]):
+            #print(index)
             if (index==X_tmp.shape[0]-1): print("Patient{} class {} ended".format(patient, label))
-            gradcam = compute_saliency(saved_model, guided_model,
-                                                           np.expand_dims(X_tmp[index, :, :, :], axis=0), H=10, W=512,
-                                                           layer_name='conv5',
-                                                           cls=-1, visualize=False, save=False)
+            # gradcam = compute_saliency(saved_model, guided_model,
+            #                                                np.expand_dims(X_tmp[index, :, :, :], axis=0), H=10, W=512,
+            #                                                layer_name='conv5',
+            #                                                cls=-1, visualize=False, save=False)
+
+            gradcam = compute_gradcam_2(saved_model,
+                                       np.expand_dims(X_tmp[index, :, :, :], axis=0),
+                                       layer_name='conv5',
+                                       cls=-1)
+
             gradcam_value[index, :, :] = gradcam
+
+
         gradcam_result[label] = {'gradcam_values': gradcam_value}
+
         with open(
-                '../resources/gradcam_results_patient{}_conv_1D.pkl'.format(patient),
+                '../resources/gradcam_results_patient{}_conv_1D_method2.pkl'.format(patient),
                 'wb') as f:
             pickle.dump(gradcam_result, f)
-    return gradcam_result
+    return 1
 
 if __name__ == "__main__":
     # tempraory datasetdd
-    with open('../resources/Xtest_correct.pkl', 'rb') as f:
+    with open('../resources/data/Xtest_correct.pkl', 'rb') as f:
         Xtest = pickle.load(f)
     ##model
     patient=list(range(11))
     params_list = [list(range(0,11)), Xtest]
-    out=customMultiprocessing(compute_gradcam, params_list, pool_size=11)
+    out=customMultiprocessing(compute_gradcam, params_list, pool_size=8)
     #compute_gradcam(patient=patient, Xtest=Xtest[patient])
