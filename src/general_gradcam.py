@@ -9,6 +9,7 @@ from guided_grad_cam_our_model import build_model, load_image, deprocess_image, 
 import pickle
 import pandas as pd
 import cv2
+from utils.customMultiprocessing import customMultiprocessing
 
 
 # Xtrainset, Ytrainset, Xtestset, Ytestset=load_data_CNN()
@@ -58,7 +59,8 @@ def compute_gradcam(patient, Xtest):
 
         print(X_tmp.shape[0])
         for index in range(X_tmp.shape[0]):
-            gradcam, gb, guided_gradcam = compute_saliency(saved_model, guided_model,
+            if (index==X_tmp.shape[0]-1): print("Patient{} class {} ended".format(patient, label))
+            gradcam = compute_saliency(saved_model, guided_model,
                                                            np.expand_dims(X_tmp[index, :, :, :], axis=0), H=10, W=512,
                                                            layer_name='conv5',
                                                            cls=-1, visualize=False, save=False)
@@ -70,11 +72,12 @@ def compute_gradcam(patient, Xtest):
             pickle.dump(gradcam_result, f)
     return gradcam_result
 
-
 if __name__ == "__main__":
-    # tempraory dataset
-    with open('../resources/data/Xtest_correct.pkl', 'rb') as f:
+    # tempraory datasetdd
+    with open('../resources/Xtest_correct.pkl', 'rb') as f:
         Xtest = pickle.load(f)
     ##model
-    patient=0
-    compute_gradcam(patient=patient, Xtest=Xtest[patient])
+    patient=list(range(11))
+    params_list = [list(range(0,11)), Xtest]
+    out=customMultiprocessing(compute_gradcam, params_list, pool_size=11)
+    #compute_gradcam(patient=patient, Xtest=Xtest[patient])
