@@ -26,9 +26,9 @@ def compute_gradcam(patient, Xtest):
 
     #### Divide the Xtest dataset depending on the predicted label. list of 8 datasets
     ####backprop model
-    model_tmp=build_model(saved_model)
-    guided_model = build_guided_model(saved_model)
-    guided_model.summary()
+    #model_tmp=build_model(saved_model)
+    #guided_model = build_guided_model(saved_model)
+    #guided_model.summary()
 
     ##preds array
     preds = saved_model.predict(Xtest)
@@ -83,10 +83,10 @@ def compute_gradcam(patient, Xtest):
 
 if __name__ == "__main__":
     # tempraory datasetdd
-    with open('../resources/data/Xtest_correct.pkl', 'rb') as f:
+    with open('../resources/Xtest_correct.pkl', 'rb') as f:
         Xtest = pickle.load(f)
     ##model
     patient=list(range(11))
     params_list = [list(range(0,11)), Xtest]
-    out=customMultiprocessing(compute_gradcam, params_list, pool_size=8)
+    out=customMultiprocessing(compute_gradcam, params_list, pool_size=11)
     #compute_gradcam(patient=patient, Xtest=Xtest[patient])

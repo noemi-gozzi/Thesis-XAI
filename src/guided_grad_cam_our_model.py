@@ -133,9 +133,9 @@ def grad_cam(input_model, image, cls, layer_name, H, W):
     # Process CAM and resive to the input image dimension
     cam = cv2.resize(cam, (W, H), cv2.INTER_LINEAR)
     cam = np.maximum(cam, 0)
-    cam_max = cam.max()
-    if cam_max != 0:
-        cam = cam / cam_max
+    #cam_max = cam.max()
+    #if cam_max != 0:
+    #    cam = cam / cam_max
     return cam
 
 
@@ -177,13 +177,13 @@ def compute_saliency(model, guided_model, preprocessed_input, H, W, layer_name='
     #     print('\t{:15s}\t({})\twith probability {:.3f}'.format(p[1], c, p[2]))
     if cls == -1:
         cls = np.argmax(predictions)
-        print(cls)
+        #print(cls)
     # class_name = decode_predictions(np.eye(1, 1000, cls))[0][0][1]
     # print("Explanation for '{}'".format(class_name))
 
     gradcam = grad_cam(model, preprocessed_input, cls, layer_name, H, W)
-    gb = guided_backprop(guided_model, preprocessed_input, layer_name)
-    guided_gradcam = gb * gradcam[..., np.newaxis]
+    #gb = guided_backprop(guided_model, preprocessed_input, layer_name)
+    #guided_gradcam = gb * gradcam[..., np.newaxis]
 
     if save:
         jetcam = cv2.applyColorMap(np.uint8(255 * gradcam), cv2.COLORMAP_JET)
@@ -211,7 +211,8 @@ def compute_saliency(model, guided_model, preprocessed_input, H, W, layer_name='
         plt.imshow(np.flip(deprocess_image(guided_gradcam[0]), -1))
         plt.show()
 
-    return gradcam, gb, guided_gradcam
+   # return gradcam, gb, guided_gradcam
+    return gradcam
 
 
 if __name__ == '__main__':

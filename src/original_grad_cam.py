@@ -147,7 +147,7 @@ def compute_gradcam_2(model, preprocessed_input, layer_name='block5_conv3', cls=
     #     print('\t{:15s}\t({})\twith probability {:.3f}'.format(p[1], c, p[2]))
     if cls == -1:
         cls = np.argmax(predictions)
-        print(cls)
+        #print(cls)
     # class_name = decode_predictions(np.eye(1, 1000, cls))[0][0][1]
     # print("Explanation for '{}'".format(class_name))
 
