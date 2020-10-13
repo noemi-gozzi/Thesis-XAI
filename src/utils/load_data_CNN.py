@@ -53,10 +53,10 @@ def load_data_CNN():
         Xtestset.append(np.append(np.append(xtest_rr[0], xtest_rr[1], axis=0), xtest_rr[2], axis=0))
         Ytrainset.append(np.append(np.append(ytrain_rr[0], ytrain_rr[1], axis=0), ytrain_rr[2], axis=0))
         Ytestset.append(np.append(np.append(ytest_rr[0], ytest_rr[1], axis=0), ytest_rr[2], axis=0))
-    from sklearn.utils import shuffle
-    for i in range(11):
-        Xtrainset[i] , Ytrainset[i] = shuffle(Xtrainset[i],Ytrainset[i])
-        Xtestset[i] , Ytestset[i] = shuffle(Xtestset[i],Ytestset[i])
+    # from sklearn.utils import shuffle
+    # for i in range(11):
+    #     Xtrainset[i] , Ytrainset[i] = shuffle(Xtrainset[i],Ytrainset[i])
+    #     Xtestset[i] , Ytestset[i] = shuffle(Xtestset[i],Ytestset[i])
       # Xtrainset[i] = np.swapaxes(Xtrainset[i],1,2)
       # Xtestset[i] = np.swapaxes(Xtestset[i],1,2)
         print("full test label shape : " + str(Xtestset[i].shape))

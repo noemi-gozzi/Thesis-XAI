@@ -55,17 +55,17 @@ def load_dataset():
     # loading sepearte databases for each round and subject
     for i in range(0, N_Subj):
         df_r1[i] = pd.read_csv(
-            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\database_v2_sbj{}_s1_WL512_S128_r1.csv".format(
+            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\Version 3(V2 without shuffle)\\database_v3_sbj{}_s1_WL512_S128_r1.csv".format(
                 i + 1))
         df_r1[i].columns = cl_names
 
         df_r2[i] = pd.read_csv(
-            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\database_v2_sbj{}_s1_WL512_S128_r2.csv".format(
+            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\Version 3(V2 without shuffle)\\database_v3_sbj{}_s1_WL512_S128_r2.csv".format(
                 i + 1))
         df_r2[i].columns = cl_names
 
         df_r3[i] = pd.read_csv(
-            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\database_v2_sbj{}_s1_WL512_S128_r3.csv".format(
+            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\Version 3(V2 without shuffle)\\database_v3_sbj{}_s1_WL512_S128_r3.csv".format(
                 i + 1))
         df_r3[i].columns = cl_names
 
@@ -246,7 +246,8 @@ def load_dataset():
     TD = list(range(0, 40))  # MAV,ZC,SSC,WL
     ITD = list(range(0, 70)) + list(range(120, 140))  # MAV, ZC, SSC, WL, HP-A, HP-M, HP-C,RMS,IEMG
     CB = list(range(10, 40)) + list(range(50, 90))  # ZC, SSC, WL, HP_M. HP_C, ,SE, CC1
-    full = list(range(0, 150))
+    full = list(range(0, 70)) + list(range(120, 140)) +list(range(70, 120)) + list(range(140, 150))
+    full_move=list(range(0, 70)) + list(range(120, 140)) +list(range(70, 120)) + list(range(140, 152))
 
     Samp_pipline = list(range(30, 40)) + list(range(70, 90)) + list(range(120, 130))  # WL,SE,CCI,IEMG
     HP = list(range(40, 70))
@@ -254,7 +255,7 @@ def load_dataset():
     opt = list(range(30, 40)) + list(range(50, 70)) + list(range(80, 90))  # WL, HP-M, HP-C, CCI
     full_skew = list(range(0, 140))
 
-    f_set = ITD  # this should be changed when you want to use different feature set (and following cells must be executed again)
+    f_set = full  # this should be changed when you want to use different feature set (and following cells must be executed again)
     f_name = "full"  # this will be used if you want to save the scaler model and trained model for future used
     # after changing feature set this cell and following ones must be executed again
     # extract x and y for training and testing sets
@@ -318,8 +319,8 @@ def load_dataset():
         # for some algorithms (e.g. perceptron) shuffling the samples is very important
 
     from sklearn.utils import shuffle
-    for i in range(N_Subj):
-        X_train[i], y_train[i] = shuffle(X_train[i], y_train[i])
-        X_test[i], y_test[i] = shuffle(X_test[i], y_test[i])
-        print("full test label shape : " + str(y_test[i].shape))
+    # for i in range(N_Subj):
+    #     X_train[i], y_train[i] = shuffle(X_train[i], y_train[i])
+    #     X_test[i], y_test[i] = shuffle(X_test[i], y_test[i])
+    #     print("full test label shape : " + str(y_test[i].shape))
     return X_train, y_train, X_test, y_test
