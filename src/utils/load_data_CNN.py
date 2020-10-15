@@ -59,7 +59,7 @@ def load_data_CNN():
     #     Xtestset[i] , Ytestset[i] = shuffle(Xtestset[i],Ytestset[i])
       # Xtrainset[i] = np.swapaxes(Xtrainset[i],1,2)
       # Xtestset[i] = np.swapaxes(Xtestset[i],1,2)
-        print("full test label shape : " + str(Xtestset[i].shape))
+        #print("full test label shape : " + str(Xtestset[i].shape))
     for i in range (11):
         Xtrainset[i] = Xtrainset[i].reshape(Xtrainset[i].shape[0],Xtrainset[i].shape[1],Xtrainset[i].shape[2],1)
         Xtestset[i] = Xtestset[i].reshape(Xtestset[i].shape[0],Xtestset[i].shape[1],Xtestset[i].shape[2],1)
