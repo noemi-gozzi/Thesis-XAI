@@ -118,7 +118,7 @@ def grad_cam2(input_model, image, category_index, layer_name):
     weights = np.mean(grads_val, axis=(0, 1))
     cam = np.dot(output, weights)
 
-    cam = cv2.resize(cam, (512, 10), cv2.INTER_LINEAR)
+    cam = cv2.resize(cam, (512, 6), cv2.INTER_LINEAR)
     cam = np.maximum(cam, 0) #RELU
     #heatmap = cam / np.max(cam)
 
