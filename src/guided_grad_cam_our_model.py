@@ -107,7 +107,7 @@ def grad_cam(input_model, image, cls, layer_name, H, W):
     """GradCAM method for visualizing input saliency.
     :param input_model: trained CNN model
     :param image: image to be explained. dimension (1xHxWxD) D:(BW iamges or RGB)
-    :param cls: label of the image
+    :param cls: prediction of the image
     :param layer_name: last conv layer name
     :param H: Height
     :param W: Width
@@ -182,8 +182,8 @@ def compute_saliency(model, guided_model, preprocessed_input, H, W, layer_name='
     # print("Explanation for '{}'".format(class_name))
 
     gradcam = grad_cam(model, preprocessed_input, cls, layer_name, H, W)
-    #gb = guided_backprop(guided_model, preprocessed_input, layer_name)
-    #guided_gradcam = gb * gradcam[..., np.newaxis]
+    gb = guided_backprop(guided_model, preprocessed_input, layer_name)
+    guided_gradcam = gb * gradcam[..., np.newaxis]
 
     if save:
         jetcam = cv2.applyColorMap(np.uint8(255 * gradcam), cv2.COLORMAP_JET)
@@ -212,7 +212,7 @@ def compute_saliency(model, guided_model, preprocessed_input, H, W, layer_name='
         plt.show()
 
    # return gradcam, gb, guided_gradcam
-    return gradcam
+    return gradcam, gb, guided_gradcam
 
 
 if __name__ == '__main__':
