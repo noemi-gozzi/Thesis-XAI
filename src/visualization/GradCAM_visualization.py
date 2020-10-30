@@ -20,11 +20,11 @@ def visualize_gradcam(Xtest, patient):
     :param patient: patient
     :return:
     """
-    path = root_path + "/resources/Grad-CAM/gradcam_results_patient{}_conv_1D.pkl".format(patient)
+    path = root_path + "/resources/GRAD-CAM method 2/kernel30/gradcam_results_patient{}_conv_2D_6channels_kernel30.pkl".format(patient)
     with open(path, 'rb') as f:
         gradcam = pickle.load(f)
 
-    saved_model = load_model(root_path + '/resources/Conv1D/Conv1D_pat_{}.h5'.format(patient),
+    saved_model = load_model(root_path + '/resources/new_models/kernel30/Conv2D_6channels_pat_{}_kernel30.h5'.format(patient),
                              custom_objects={'RReLU': RReLU})
     classes = 8
     preds = saved_model.predict(Xtest[patient])
@@ -34,23 +34,38 @@ def visualize_gradcam(Xtest, patient):
     Xtest_list = []
     for label in np.unique(labels_preds):
         Xtest_list.append(Xtest[patient][labels_preds == label])
-    for cls in range(classes):
+    #for cls in range(classes):
+    for cls in [1]:
         gradcam_value = gradcam[cls]["gradcam_values"]
         ####preds array
         preds_tmp = saved_model.predict(Xtest_list[cls])[:, cls]
         # weighting each result depending on how much sure was the prediction
 
-        for index in range(len(preds_tmp)):
-            gradcam_value[index, :, :] = gradcam_value[index, :, :] * preds_tmp[index]
+        # for index in range(len(preds_tmp)):
+        #for index in range(15,16):
+        index=15
+        gradcam_value[index, :, :] = (gradcam_value[index, :, :] * preds_tmp[index])/np.max(gradcam_value[index, :, :])
         mean_val = np.average(gradcam_value, axis=0)
+        # plt.figure(figsize=(30, 10))
+        # plt.imshow(mean_val, cmap='jet', aspect='auto', alpha=0.5)
+        # #plt.savefig(root_path + "/resources/GRAD-CAM method 2/6 channels 3conv/gradcam_patient{}_label{}_conv5.jpg".format(patient, cls))
+        # plt.title("Class{}".format(cls), fontsize=20)
+        # plt.show()
         plt.figure(figsize=(30, 10))
-        plt.imshow(mean_val, cmap='jet', aspect='auto', alpha=0.5)
-        plt.savefig(root_path + "/resources/Grad-CAM/gradcam_patient{}_label{}.jpg".format(patient, cls))
+        plt.imshow(gradcam_value[index, :, :], cmap='jet', aspect='auto', alpha=0.5)
+        #plt.savefig(root_path + "/resources/GRAD-CAM method 2/6 channels 3conv/gradcam_patient{}_label{}_conv5.jpg".format(patient, cls))
+        plt.title("Class{}".format(cls), fontsize=20)
         plt.show()
     return
 
-
 if __name__ == "__main__":
-    with open(root_path + '/resources/data/Xtest_correct.pkl', 'rb') as f:
+    with open(root_path + '/resources/data_deep/data_ordered/Xtest_big.pkl', 'rb') as f:
         Xtest = pickle.load(f)
-    visualize_gradcam(Xtest, patient=9)
+    Xtestset_drop=[]
+    for patient in range(11):
+        X_tmp=np.zeros((len(Xtest[patient]), 6, 512,1))
+        for index in range(len(Xtest[patient])):
+            X_tmp[index]=np.delete(Xtest[patient][index], [6,7,8,9], axis=0)
+        Xtestset_drop.append(X_tmp)
+
+    visualize_gradcam(Xtestset_drop, patient=0)
