@@ -20,6 +20,7 @@ from utils.customMultiprocessing import customMultiprocessing
 from utils.load_data import load_dataset
 import pickle
 import copy
+import time
 # import shap.explainers._sampling as shap if this, use Sampling
 import shap  # if this use samplingexplainer
 from sklearn.model_selection import GridSearchCV
@@ -80,13 +81,17 @@ def classify_personalized(file_path, X_train, y_train, X_test, y_test):
 def model_fit(model, x_train, y_train, x_test, y_test, model_name):
     print(model_name)
     score = {}
+    t_1=time.clock()
     model.fit(x_train, y_train)
-    print(("fit"))
+    t_2=time.clock()
     y_pred = model.predict(x_test)
+    t_3=time.clock()
     acc = metrics.accuracy_score(y_test, y_pred)
     f1 = metrics.f1_score(y_test, y_pred, average="weighted")
     score[model_name] = {'acc': acc, 'f1': f1, 'model': copy.copy(model),
-                         'confusion matrix': classification_report(y_test, y_pred)}
+                         'confusion matrix': classification_report(y_test, y_pred),
+                         'training time': t_2-t_1,
+                         'test time': t_3-t_2}
 
     print("model\t", model_name, "\n accuracy:", acc, "f1:", f1)
     print(classification_report(y_test, y_pred))
@@ -187,14 +192,41 @@ def grid_search_algorithm(classifier, parameters, X_train, y_train, X_test, y_te
 
 if __name__ == "__main__":
     #####CLASSIFY each patient separately
-    file_path = '../resources/results_classification/classification_featureset_wo_ssc_hpc.pkl'
-    X_train, y_train, X_test, y_test=load_dataset()
+    file_path = '../resources/results_classification/RMS_HPC_HPM_ch6.pkl'
+    with open("../data_shap/X_train_ordered_150.pkl", 'rb') as f:
+        X_train = pickle.load(f)
+    with open("../data_shap/X_test_ordered_150.pkl", 'rb') as f:
+        X_test = pickle.load(f)
+    with open("../data_shap/y_train_ordered_150.pkl", 'rb') as f:
+        y_train = pickle.load(f)
+    with open("../data_shap/y_test_ordered_150.pkl", 'rb') as f:
+        y_test = pickle.load(f)
+    # with open("../X_train_sess_2.pkl", 'rb') as f:
+    #     X_train = pickle.load(f)
+    # with open("../X_test_sess_2.pkl", 'rb') as f:
+    #     X_test = pickle.load(f)
+    # with open("../y_train_sess_2.pkl", 'rb') as f:
+    #     y_train = pickle.load(f)
+    # with open("../y_test_sess_2.pkl", 'rb') as f:
+    #     y_test = pickle.load(f)
 
-    for patient in range(11):
-        for i in range(1, 11):
-            X_test[patient] = X_test[patient].drop(["SSC{}".format(i), "HP_C{}".format(i)], axis=1)
-            X_train[patient] = X_train[patient].drop(["SSC{}".format(i), "HP_C{}".format(i)], axis=1)
+    num_patient=len(X_train)
+    #drop_set=["HP_C{}".format(i), "HP_M{}".format(i),"WL{}".format(i), "IEMG{}".format(i), "HP_A{}".format(i), "MAV{}".format(i), "RMS{}".format(i)]
 
+    for patient in range(num_patient):
+        for i in range(1,11):
+            drop_set = ["SSC{}".format(i), "ZC{}".format(i), "MAV{}".format(i), "HP_A{}".format(i), "IEMG{}".format(i), "WL{}".format(i)]
+            X_test[patient] = X_test[patient].drop(drop_set, axis=1)
+            X_train[patient] = X_train[patient].drop(drop_set, axis=1)
+
+
+        for i in range (1,11):
+            X_test[patient] = X_test[patient].drop(["SE{}".format(i), "CCI_{}".format(i), "CCII_{}".format(i),"CCIII_{}".format(i), "CCIV_{}".format(i), "SKEW{}".format(i)], axis=1)
+            X_train[patient] = X_train[patient].drop(["SE{}".format(i), "CCI_{}".format(i), "CCII_{}".format(i),"CCIII_{}".format(i), "CCIV_{}".format(i), "SKEW{}".format(i)], axis=1)
+        for i in range(6,11):
+            drop_set = ["RMS{}".format(i), "HP_C{}".format(i), "HP_M{}".format(i)]
+            X_test [patient]= X_test[patient].drop(drop_set, axis=1)
+            X_train [patient]=X_train[patient].drop(drop_set, axis=1)
     classify_personalized(file_path,  X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
 
     #####calculate shap values for each patient for some type of trees.
@@ -217,3 +249,6 @@ if __name__ == "__main__":
     # for patient in range(10,num_patient):
     #     scores[patient]=grid_search_algorithm(model, parameters, X_train[patient], y_train[patient], X_test[patient], y_test[patient])
     #     print(scores)
+
+# 7.925x10-2 8.927 x10-2 6.776 x10-2 9.979 x10-2 8.788 x10-2 1.833 x10-1
+# 2.558 x10-1 147.9 125.3 9.5456e-02 3.1459e-02 1.3

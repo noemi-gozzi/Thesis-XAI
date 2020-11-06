@@ -92,28 +92,24 @@ def model_fit(model, x_train, y_train, x_test, y_test, model_name):
     return score
 
 def shap_values (path_shap):
-    with open("../X_train_sess_2.pkl", 'rb') as f:
+    with open("../X_train_ordered_150.pkl", 'rb') as f:
         X_train = pickle.load(f)
-    with open("../X_test_sess_2.pkl", 'rb') as f:
+    with open("../X_test_ordered_150.pkl", 'rb') as f:
         X_test = pickle.load(f)
-    with open("../y_train_sess_2.pkl", 'rb') as f:
+    with open("../y_train_ordered_150.pkl", 'rb') as f:
         y_train = pickle.load(f)
-    with open("../y_test_sess_2.pkl", 'rb') as f:
+    with open("../y_test_ordered_150.pkl", 'rb') as f:
         y_test = pickle.load(f)
-
-    num_patient=len(X_train)
-    num_channels=10
     
-    for patient in range(num_patient):
-        for i in range (1,num_channels+1):
-            feature_set_drop=["SE{}".format(i), "CCI_{}".format(i), "CCII_{}".format(i),"CCIII_{}".format(i), "CCIV_{}".format(i), "SKEW{}".format(i)]
-            X_test[patient] = X_test[patient].drop(feature_set_drop, axis=1)
-            X_train[patient] = X_train[patient].drop(feature_set_drop, axis=1)
+    for patient in range(11):
+        for i in range (1,11):
+            X_test[patient] = X_test[patient].drop(["SE{}".format(i), "CCI_{}".format(i), "CCII_{}".format(i),"CCIII_{}".format(i), "CCIV_{}".format(i), "SKEW{}".format(i), "MAV{}".format(i), "WL{}".format(i), "IEMG{}".format(i), "HP_A{}".format(i)], axis=1)
+            X_train[patient] = X_train[patient].drop(["SE{}".format(i), "CCI_{}".format(i), "CCII_{}".format(i),"CCIII_{}".format(i), "CCIV_{}".format(i), "SKEW{}".format(i), "MAV{}".format(i), "WL{}".format(i), "IEMG{}".format(i), "HP_A{}".format(i)], axis=1)
 
     num_patient = len(X_train)
 
-    models = {'LDA': LinearDiscriminantAnalysis(solver='svd')
-               # 'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
+    models = {#'LDA': LinearDiscriminantAnalysis(solver='svd')
+                'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
         #'KNN': KNeighborsClassifier(n_neighbors=40)
     }
     for model_name in models.keys():
@@ -153,7 +149,7 @@ def shap_multiprocessing(patient, model, X_train, y_train, X_test, y_test):
     model.fit(X_train, y_train)
     # create explainer
     #shap_explainer = shap.KernelExplainer(model_list[patient].predict_proba, X_train.iloc[0:500, :])
-    shap_explainer = shap.KernelExplainer(model.predict_proba, X_train.iloc[0:1600, :])
+    shap_explainer = shap.KernelExplainer(model.predict_proba, shap.sample(X_train, 500))
     shap_values = shap_explainer.shap_values(X_test)
     # for i in range(len(shap_values)):
     #     shap_df = pd.DataFrame(data=shap_values[i], columns=X_test[i].columns.values)
@@ -164,7 +160,7 @@ def shap_multiprocessing(patient, model, X_train, y_train, X_test, y_test):
     # plt.savefig(path_img_bar)
 
     with open(
-            '../resources/results_ordered/SHAP_no_correlated_features/SHAP_LDA_{}_sess_2'.format(patient),
+            '../resources/results_ordered/SHAP_no_correlated_features/SHAP_SVM_{}.pkl'.format(patient),
             'wb') as f:
         pickle.dump(shap_values, f)
     return 1

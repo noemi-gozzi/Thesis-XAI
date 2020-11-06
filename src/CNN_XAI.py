@@ -16,7 +16,7 @@ from original_grad_cam import grad_cam2
 
 # Xtrainset, Ytrainset, Xtestset, Ytestset=load_data_CNN()
 # num_patient=len(Xtrainset)
-with open('../resources/data/Xtest_correct.pkl', 'rb') as f:
+with open('../resources/data_deep/data_not_ordered/Xtest_correct.pkl', 'rb') as f:
     Xtestset = pickle.load(f)
 ##model
 
@@ -45,8 +45,10 @@ model_tmp=build_model(saved_model)
 guided_model = build_guided_model(saved_model)
 guided_model.summary()
 #plt.imshow(load_image(image_path, H, W)[0])
-gradcam, gb, guided_gradcam = compute_saliency(saved_model, guided_model, Xtest_expand, H=10, W=512, layer_name='conv5',
-                                                cls=-1, visualize=False, save=False)
+gradcam, gb, guided_gradcam = compute_saliency(saved_model, guided_model,
+                                                           Xtest_expand, H=10, W=512,
+                                                           layer_name='conv5',
+                                                           cls=-1, visualize=False, save=False)
 #predictions = saved_model.predict(preprocessed_input)
 # top_1 = decode_predictions(predictions)[0][0]
 # print('Predicted class:')
@@ -54,7 +56,7 @@ gradcam, gb, guided_gradcam = compute_saliency(saved_model, guided_model, Xtest_
 #
 # predicted_class = np.argmax(predictions)
 # print(to_categorical((np.argmax((preds), axis=1)),8)[0])
-cam, heatmap = grad_cam2(saved_model, Xtest_expand, predicted_class, "conv5")
+heatmap = grad_cam2(saved_model, Xtest_expand, predicted_class, "conv5")
 cv2.imwrite("gradcam3.jpg", cam)
 plt.figure(figsize=(30,10))
 plt.imshow(Xtest_expand[0,:,:,0], interpolation='nearest', cmap='Greys')

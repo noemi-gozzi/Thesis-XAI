@@ -6,7 +6,9 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, AdaBoostClassifier, BaggingClassifier
 from sklearn import metrics
-from utils.load_data import load_dataset
+import sys
+sys.path.append('..')
+#from utils.load_data import load_dataset
 import pickle
 import copy
 import shap
@@ -70,17 +72,17 @@ def load_dataset_all():
     # loading sepearte databases for each round and subject
     for i in range(0, N_Subj):
         df_r1[i] = pd.read_csv(
-            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\Version 3(V2 without shuffle)\\database_v3_sbj{}_s1_WL512_S128_r1.csv".format(
+            "/home/tesi/Thesis-XAI/resources/data_features/Version 3(V2 without shuffle)/database_v3_sbj{}_s1_WL512_S128_r1.csv".format(
                 i + 1))
         df_r1[i].columns = cl_names
 
         df_r2[i] = pd.read_csv(
-            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\Version 3(V2 without shuffle)\\database_v3_sbj{}_s1_WL512_S128_r2.csv".format(
+            "/home/tesi/Thesis-XAI/resources/data_features/Version 3(V2 without shuffle)/database_v3_sbj{}_s1_WL512_S128_r2.csv".format(
                 i + 1))
         df_r2[i].columns = cl_names
 
         df_r3[i] = pd.read_csv(
-            "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\data_features\\Version 3(V2 without shuffle)\\database_v3_sbj{}_s1_WL512_S128_r3.csv".format(
+            "/home/tesi/Thesis-XAI/resources/data_features/Version 3(V2 without shuffle)/database_v3_sbj{}_s1_WL512_S128_r3.csv".format(
                 i + 1))
         df_r3[i].columns = cl_names
 
@@ -343,7 +345,7 @@ def load_dataset_all():
     # scaler.transform(X)
         # for some algorithms (e.g. perceptron) shuffling the samples is very important
 
-    from sklearn.utils import shuffle
+    #from sklearn.utils import shuffle
     # for i in range(N_Subj):
     #     X_train[i], y_train[i] = shuffle(X_train[i], y_train[i])
     #     X_test[i], y_test[i] = shuffle(X_test[i], y_test[i])
@@ -414,6 +416,7 @@ def classify(file_path):
 
         scaler = StandardScaler(copy=False).fit(x_train)
         scaler.transform(x_train)
+        scaler = StandardScaler(copy=False).fit(x_test)
         scaler.transform(x_test)
 
         #create parameter list for multiprocessing. data must be lists of the same length or single instances
@@ -452,7 +455,7 @@ def model_fit(model, x_train, y_train, x_test, y_test, model_name):
     y_pred = model.predict(x_test)
     acc = metrics.accuracy_score(y_test, y_pred)
     f1 = metrics.f1_score(y_test, y_pred, average="weighted")
-    score[model_name] = {'acc': acc, 'f1': f1, 'model': copy.copy(model)}
+    score[model_name] = {'acc': acc, 'f1': f1}
 
     print("model\t", model_name, "\n accuracy:", acc, "f1:", f1)
     return score
@@ -506,6 +509,6 @@ if __name__ == "__main__":
     #             '\\results_classification\\scores.pkl '
     # classify(file_path)
 
-    path = "C:\\Users\\noemi\\Desktop\\university\\university\\tesi\\Thesis-XAI\\resources\\results_classification\\classify_all_LOSO.pkl"
+    path = "/home/tesi/Thesis-XAI/resources/classify_all_LOSO_2.pkl"
     classify(path)
 

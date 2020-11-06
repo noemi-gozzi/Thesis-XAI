@@ -109,19 +109,23 @@ def shap_values (path_shap):
             feature_set_drop=["SE{}".format(i), "CCI_{}".format(i), "CCII_{}".format(i),"CCIII_{}".format(i), "CCIV_{}".format(i), "SKEW{}".format(i)]
             X_test[patient] = X_test[patient].drop(feature_set_drop, axis=1)
             X_train[patient] = X_train[patient].drop(feature_set_drop, axis=1)
+            
+    random_seed = 0;
+    n_estimators = 50;
 
-    num_patient = len(X_train)
-
-    models = {'LDA': LinearDiscriminantAnalysis(solver='svd')
-               # 'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
+    models = {#'LDA': LinearDiscriminantAnalysis(solver='svd')
+              #'SVM_tuned': SVC(kernel='linear', C=1, class_weight="balanced", gamma='auto', probability=True)
         #'KNN': KNeighborsClassifier(n_neighbors=40)
+        'ExtremelyRandomizedTrees': ExtraTreesClassifier(n_estimators=n_estimators,
+                                                                 random_state=random_seed)
     }
     for model_name in models.keys():
         print(model_name)
         #for each model train the model for each patient and compute shap values
         model = models[model_name]
         params_list = [list(range(0,num_patient)), model, X_train, y_train, X_test, y_test]
-        SHAP=customMultiprocessing(shap_multiprocessing, params_list, pool_size=11)
+        #SHAP=customMultiprocessing(shap_multiprocessing, params_list, pool_size=11)
+        SHAP=customMultiprocessing(shap_multiprocessing_tree, params_list, pool_size=11)
         # with open(
         #         '../resources/shap_SVM_all_patients.pkl',
         #         'wb') as f:
@@ -143,28 +147,18 @@ def shap_values (path_shap):
 
     return
 
-def shap_multiprocessing(patient, model, X_train, y_train, X_test, y_test):
-    shap_list = []
-    print((patient))
-    # training
-    model_list={}
-    #model_list[patient]=clone(model_pat)
-    #model_list[patient].fit(X_train, y_train)
+
+def shap_multiprocessing_tree(patient, model, X_train, y_train, X_test, y_test):
+
     model.fit(X_train, y_train)
     # create explainer
     #shap_explainer = shap.KernelExplainer(model_list[patient].predict_proba, X_train.iloc[0:500, :])
-    shap_explainer = shap.KernelExplainer(model.predict_proba, X_train.iloc[0:1600, :])
+    shap_explainer = shap.TreeExplainer(model, X_train)
     shap_values = shap_explainer.shap_values(X_test)
-    # for i in range(len(shap_values)):
-    #     shap_df = pd.DataFrame(data=shap_values[i], columns=X_test[i].columns.values)
-    #     shap_list.append(shap_df)
-    # path_img_bar = path_shap + "model{}_patient{}_allclasses_tmp.png".format(model_name,patient)
-    # plt.figure()
-    # shap.summary_plot(shap_values, X_test[patient], plot_type="bar", show=False)
-    # plt.savefig(path_img_bar)
+
 
     with open(
-            '../resources/results_ordered/SHAP_no_correlated_features/SHAP_LDA_{}_sess_2'.format(patient),
+            '../resources/results_ordered/shap_XRT_ordered_patient_{}_sess_2.pkl'.format(patient+6),
             'wb') as f:
         pickle.dump(shap_values, f)
     return 1
